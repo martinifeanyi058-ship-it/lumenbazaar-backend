@@ -298,9 +298,11 @@ describe("CORS HTTP integration", () => {
       expect(response.headers.get("access-control-allow-headers")).toMatch(
         /Mcp-Protocol-Version/i
       );
+      expect(response.headers.get("access-control-allow-headers")).toMatch(/traceparent/i);
       expect(response.headers.get("access-control-expose-headers")).toMatch(
         /Mcp-Session-Id/i
       );
+      expect(response.headers.get("access-control-expose-headers")).toMatch(/traceparent/i);
       expect(response.headers.get("access-control-allow-credentials")).toBe("true");
       expect(response.headers.get("access-control-max-age")).toBeTruthy();
     } finally {
