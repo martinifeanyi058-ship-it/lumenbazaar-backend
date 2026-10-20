@@ -37,8 +37,8 @@ import { type McpToolCapabilities } from "./tools.js";
 // ---------------------------------------------------------------------------
 
 const MCP_CORS_ALLOW_HEADERS =
-  "Content-Type, Accept, Mcp-Session-Id, Mcp-Protocol-Version, Authorization";
-const MCP_CORS_EXPOSE_HEADERS = "Mcp-Session-Id";
+  "Content-Type, Accept, Mcp-Session-Id, Mcp-Protocol-Version, Authorization, traceparent";
+const MCP_CORS_EXPOSE_HEADERS = "Mcp-Session-Id, traceparent";
 const MCP_CORS_MAX_AGE = "600"; // 10 minutes
 
 /**
