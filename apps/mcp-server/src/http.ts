@@ -6,7 +6,13 @@ import { pathToFileURL } from "node:url";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 
-import { getReleaseCommit, loadConfig, serviceName } from "@lumenbazaar/shared";
+import {
+  getReleaseCommit,
+  loadConfig,
+  runWithTraceparent,
+  serviceName,
+  startTraceSpan
+} from "@lumenbazaar/shared";
 
 import { BackendClient } from "./client.js";
 import { createMcpServer, mcpToolSchemaDocument } from "./server.js";
@@ -263,6 +269,32 @@ export async function startMcpHttpServer(
 }
 
 export async function handleMcpHttpRequest(
+  request: IncomingMessage,
+  response: ServerResponse,
+  transport: McpHttpTransport,
+  mcpPath = "/mcp",
+  options: McpHttpRouteOptions = {}
+) {
+  const rawTraceparent = request.headers.traceparent;
+  const parent = typeof rawTraceparent === "string" ? rawTraceparent : undefined;
+  return runWithTraceparent(parent, async () => {
+    const span = startTraceSpan("mcp.http.request", {
+      "http.request.method": request.method ?? "UNKNOWN"
+    });
+    if (span.traceparent !== undefined && !response.headersSent) {
+      response.setHeader("traceparent", span.traceparent);
+    }
+    return span.run(async () => {
+      try {
+        await handleMcpHttpRequestInner(request, response, transport, mcpPath, options);
+      } finally {
+        span.end({ "http.response.status_code": response.statusCode });
+      }
+    });
+  });
+}
+
+async function handleMcpHttpRequestInner(
   request: IncomingMessage,
   response: ServerResponse,
   transport: McpHttpTransport,
