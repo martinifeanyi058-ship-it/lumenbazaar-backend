@@ -332,6 +332,7 @@ export class BullMqWorkerBackend implements WorkerBackend {
         sourceJobId: String(job.id),
         sourceQueue: queueNames.settlementConfirmation,
         correlationId: job.data.correlationId,
+        traceparent: (job.data as SettlementConfirmationJobData & { traceparent?: string }).traceparent,
         paymentAttemptId: job.data.paymentAttemptId,
         settlementId: job.data.settlementId,
         reason
